@@ -103,7 +103,6 @@ class ES_SingleMachine:
                     
         parent_population = []
 
-
         for i in range(number):
             #Select k individuals at random from the initial population:
             random_indices     = np.random.choice(len(population), size = k, replace=False)
