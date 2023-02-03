@@ -43,9 +43,11 @@ class ES_SingleMachine:
     #_iter: Number of iterations for the Evolution-Strategy algorithm    
     def evolution_strategy(self, population, mu, _lambda, strategy, _iter):
 
-        if _iter > 100:
-            print("The maximum allowed number of iterations is 100.")
-            return
+        if mu < 2:
+            raise ValueError("The mu value must be at least 2.")
+
+        if _lambda < 1:
+            raise ValueError("The _lambda value must be at least 1.")
 
         for i in range(_iter):            
             #Generation cycle of the ES-Algorithm
@@ -100,26 +102,23 @@ class ES_SingleMachine:
     def tournament_selection(self, population, number, k):
                     
         parent_population = []
-                
-        if(len(population) == 1):
-            for i in range(number):
-                parent_population.append(population)
-        else:
-            for i in range(number):
-                #Select k individuals at random from the initial population:
-                random_indices     = np.random.choice(len(population), size = k, replace=False)
-                population         = np.array(population)
-                random_individuals = list(population[random_indices])
 
-                #Determine the fitness of the randomly choosen individuals:
-                fitness_werte = []
 
-                for z in random_individuals:
-                    fitness_werte.append(self.maximum_lateness(z))
+        for i in range(number):
+            #Select k individuals at random from the initial population:
+            random_indices     = np.random.choice(len(population), size = k, replace=False)
+            population         = np.array(population)
+            random_individuals = list(population[random_indices])
 
-                #Add the individual with best (smallest) fitness to the new parent population:
-                min_element = random_individuals[np.argmin(fitness_werte)]        
-                parent_population.append(min_element)       
+            #Determine the fitness of the randomly choosen individuals:
+            fitness_werte = []
+
+            for z in random_individuals:
+                fitness_werte.append(self.maximum_lateness(z))
+
+            #Add the individual with best (smallest) fitness to the new parent population:
+            min_element = random_individuals[np.argmin(fitness_werte)]        
+            parent_population.append(min_element)       
         
         return parent_population
 
@@ -169,12 +168,11 @@ class ES_SingleMachine:
         #Mid-Segment of p1:
         mid_segment = p1[cut_1:cut_2]
 
-        #Collect the indices of p2 where elements match the mid-segment of p1:
+        #Remove the mid-segment-elements of p1 from recombined p2:
         mid_indices = []
         for i in mid_segment:
-            mid_indices.append(np.where(child_elements == i))        
-
-        #Remove the mid-segment-elements of p1 from recombined p2:    
+            mid_indices.append(np.where(child_elements == i))
+            
         child_elements = np.delete(child_elements, mid_indices)
 
         #Combine the child elements with the mid segment of p1.
@@ -269,7 +267,20 @@ if __name__ == '__main__':
     #Execution of the Evolution-Strategy-Algorithm (4+12)
     minimum = machine.evolution_strategy(initial, 4, 12, Strategy.plus, 100)
 
-    #Output after last iteration:
+
+    ###Output after first iteration:
+    #-----------------------------------------------------------------
+    #Iteration 1 :
+    #133  :  [9, 11, 5, 6, 4, 1, 14, 10, 2, 8, 13, 3, 12, 15, 7]
+    #133  :  [9, 11, 5, 6, 4, 1, 14, 10, 2, 8, 13, 3, 12, 15, 7]
+    #176  :  [4, 8, 15, 5, 11, 6, 13, 14, 1, 9, 12, 3, 10, 2, 7]
+    #206  :  [14, 8, 3, 2, 4, 5, 12, 15, 9, 13, 10, 1, 7, 6, 11]
+    #-----------------------------------------------------------------
+    #Average - Iteration 1 : 162.0
+    #-----------------------------------------------------------------
+
+
+    ###Output after last iteration:
     #-----------------------------------------------------------------
     #Iteration 100 :
     #53  :  [5, 1, 2, 6, 4, 7, 11, 3, 9, 10, 15, 13, 8, 12, 14]
